@@ -38,6 +38,7 @@ export const Hero = () => {
             <Button 
               size="lg" 
               className="h-14 px-8 text-lg font-semibold gradient-hero shadow-glow hover:shadow-xl transition-all duration-300 hover:scale-105"
+              onClick={() => window.location.href = '/app'}
             >
               ابدأ مجاناً الآن
             </Button>
