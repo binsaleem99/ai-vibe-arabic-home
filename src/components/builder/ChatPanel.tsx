@@ -27,10 +27,27 @@ export const ChatPanel = ({ projectId, onCodeGenerated }: ChatPanelProps) => {
   useEffect(() => {
     if (projectId) {
       fetchMessages();
+      fetchLatestCode();
     } else {
       setMessages([]);
     }
   }, [projectId]);
+
+  const fetchLatestCode = async () => {
+    if (!projectId) return;
+
+    const { data, error } = await supabase
+      .from("generated_apps")
+      .select("code")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      onCodeGenerated(data.code);
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -130,6 +147,19 @@ export const ChatPanel = ({ projectId, onCodeGenerated }: ChatPanelProps) => {
 
       setMessages((prev) => [...prev, assistantMsg as Message]);
       onCodeGenerated(generatedCode);
+
+      // Save to generated_apps table
+      const { error: appError } = await supabase
+        .from("generated_apps")
+        .insert({
+          project_id: projectId,
+          user_id: user.id,
+          code: generatedCode,
+        });
+
+      if (appError) {
+        console.error("Failed to save generated app:", appError);
+      }
 
       toast({
         title: "تم بنجاح",
