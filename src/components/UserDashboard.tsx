@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Sparkles, Plus, ExternalLink, Code2, LogOut, Trash2, User, Globe } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -19,20 +19,10 @@ export const UserDashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState<string>("");
-  const [publishedProjects, setPublishedProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     fetchProjects();
-    fetchUserInfo();
   }, []);
-
-  const fetchUserInfo = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      setUserEmail(user.email || "");
-    }
-  };
 
   const fetchProjects = async () => {
     const { data, error } = await supabase
@@ -111,33 +101,37 @@ export const UserDashboard = () => {
             </p>
           </div>
 
-          {/* Tabs Section */}
-          <Tabs defaultValue="projects" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
-              <TabsTrigger value="projects" className="flex items-center gap-2">
-                <Code2 className="w-4 h-4" />
-                المشاريع
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                الملف الشخصي
-              </TabsTrigger>
-            </TabsList>
+          {/* Navigation Buttons */}
+          <div className="flex justify-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/profile")}
+            >
+              <User className="w-4 h-4 ml-2" />
+              الملف الشخصي
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/published")}
+            >
+              <Globe className="w-4 h-4 ml-2" />
+              المواقع المنشورة
+            </Button>
+          </div>
 
-            {/* Projects Tab */}
-            <TabsContent value="projects" className="space-y-6 mt-8">
-              <div className="flex justify-center">
-                <Button
-                  size="lg"
-                  className="h-14 px-8 text-lg font-semibold gradient-hero shadow-glow hover:shadow-xl transition-all duration-300 hover:scale-105"
-                  onClick={() => navigate("/app")}
-                >
-                  <Plus className="w-5 h-5 ml-2" />
-                  إنشاء مشروع جديد
-                </Button>
-              </div>
+          {/* Create New Project Button */}
+          <div className="flex justify-center">
+            <Button
+              size="lg"
+              className="h-14 px-8 text-lg font-semibold gradient-hero shadow-glow hover:shadow-xl transition-all duration-300 hover:scale-105"
+              onClick={() => navigate("/app")}
+            >
+              <Plus className="w-5 h-5 ml-2" />
+              إنشاء مشروع جديد
+            </Button>
+          </div>
 
-              {/* Projects Grid */}
+          {/* Projects Grid */}
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3].map((i) => (
@@ -207,53 +201,8 @@ export const UserDashboard = () => {
                   ))}
                 </div>
               )}
-            </TabsContent>
-
-            {/* Profile Tab */}
-            <TabsContent value="profile" className="space-y-6 mt-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    معلومات الملف الشخصي
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      البريد الإلكتروني
-                    </label>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-foreground">{userEmail}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      عدد المشاريع
-                    </label>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-foreground">{projects.length} مشروع</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      المواقع المنشورة
-                    </label>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-primary" />
-                        <p className="text-foreground">{publishedProjects.length} موقع منشور</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
