@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Rocket } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Message {
@@ -184,10 +184,27 @@ export const ChatPanel = ({ projectId, onCodeGenerated }: ChatPanelProps) => {
     );
   }
 
+  const handleDeploy = async () => {
+    if (!projectId) return;
+    
+    toast({
+      title: "جارٍ النشر",
+      description: "سيتم نشر المشروع قريباً",
+    });
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full">
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="text-lg font-bold">المحادثة</h2>
+        <Button
+          onClick={handleDeploy}
+          className="gradient-hero"
+          size="sm"
+        >
+          <Rocket className="w-4 h-4 ml-2" />
+          نشر
+        </Button>
       </div>
 
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>

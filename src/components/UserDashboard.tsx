@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Plus, ExternalLink, Code2, LogOut, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sparkles, Plus, ExternalLink, Code2, LogOut, Trash2, User, Globe } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -18,10 +19,20 @@ export const UserDashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [publishedProjects, setPublishedProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     fetchProjects();
+    fetchUserInfo();
   }, []);
+
+  const fetchUserInfo = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setUserEmail(user.email || "");
+    }
+  };
 
   const fetchProjects = async () => {
     const { data, error } = await supabase
@@ -93,95 +104,154 @@ export const UserDashboard = () => {
           {/* Welcome Section */}
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              مشاريعك النشطة
+              لوحة التحكم
             </h1>
             <p className="text-xl text-muted-foreground">
-              جميع مواقعك ومشاريعك في مكان واحد
+              إدارة مشاريعك وملفك الشخصي
             </p>
           </div>
 
-          {/* Create New Project Button */}
-          <div className="flex justify-center">
-            <Button
-              size="lg"
-              className="h-14 px-8 text-lg font-semibold gradient-hero shadow-glow hover:shadow-xl transition-all duration-300 hover:scale-105"
-              onClick={() => navigate("/app")}
-            >
-              <Plus className="w-5 h-5 ml-2" />
-              إنشاء مشروع جديد
-            </Button>
-          </div>
+          {/* Tabs Section */}
+          <Tabs defaultValue="projects" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+              <TabsTrigger value="projects" className="flex items-center gap-2">
+                <Code2 className="w-4 h-4" />
+                المشاريع
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                الملف الشخصي
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Projects Grid */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-6 bg-muted rounded w-3/4" />
-                    <div className="h-4 bg-muted rounded w-1/2" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-4 bg-muted rounded w-full" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : projects.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="py-12 text-center">
-                <Code2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-xl font-semibold mb-2">لا توجد مشاريع بعد</h3>
-                <p className="text-muted-foreground mb-6">
-                  ابدأ بإنشاء مشروعك الأول باستخدام الذكاء الاصطناعي
-                </p>
-                <Button onClick={() => navigate("/app")} className="gradient-hero">
-                  <Plus className="w-4 h-4 ml-2" />
-                  إنشاء أول مشروع
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
-                <Card
-                  key={project.id}
-                  className="hover-lift cursor-pointer group relative overflow-hidden"
+            {/* Projects Tab */}
+            <TabsContent value="projects" className="space-y-6 mt-8">
+              <div className="flex justify-center">
+                <Button
+                  size="lg"
+                  className="h-14 px-8 text-lg font-semibold gradient-hero shadow-glow hover:shadow-xl transition-all duration-300 hover:scale-105"
                   onClick={() => navigate("/app")}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <CardHeader className="relative">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl mb-2 line-clamp-1">
-                          {project.name}
-                        </CardTitle>
-                        <CardDescription className="line-clamp-2">
-                          {project.description || "لا يوجد وصف"}
-                        </CardDescription>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => handleDeleteProject(project.id, e)}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="relative">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>
-                        آخر تحديث: {new Date(project.updated_at).toLocaleDateString("ar-EG")}
-                      </span>
-                      <ExternalLink className="w-4 h-4" />
-                    </div>
+                  <Plus className="w-5 h-5 ml-2" />
+                  إنشاء مشروع جديد
+                </Button>
+              </div>
+
+              {/* Projects Grid */}
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardHeader>
+                        <div className="h-6 bg-muted rounded w-3/4" />
+                        <div className="h-4 bg-muted rounded w-1/2" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-4 bg-muted rounded w-full" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : projects.length === 0 ? (
+                <Card className="border-dashed">
+                  <CardContent className="py-12 text-center">
+                    <Code2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">لا توجد مشاريع بعد</h3>
+                    <p className="text-muted-foreground mb-6">
+                      ابدأ بإنشاء مشروعك الأول باستخدام الذكاء الاصطناعي
+                    </p>
+                    <Button onClick={() => navigate("/app")} className="gradient-hero">
+                      <Plus className="w-4 h-4 ml-2" />
+                      إنشاء أول مشروع
+                    </Button>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {projects.map((project) => (
+                    <Card
+                      key={project.id}
+                      className="hover-lift cursor-pointer group relative overflow-hidden"
+                      onClick={() => navigate("/app")}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <CardHeader className="relative">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-xl mb-2 line-clamp-1">
+                              {project.name}
+                            </CardTitle>
+                            <CardDescription className="line-clamp-2">
+                              {project.description || "لا يوجد وصف"}
+                            </CardDescription>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => handleDeleteProject(project.id, e)}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="relative">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <span>
+                            آخر تحديث: {new Date(project.updated_at).toLocaleDateString("ar-EG")}
+                          </span>
+                          <ExternalLink className="w-4 h-4" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="space-y-6 mt-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    معلومات الملف الشخصي
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">
+                      البريد الإلكتروني
+                    </label>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-foreground">{userEmail}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">
+                      عدد المشاريع
+                    </label>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-foreground">{projects.length} مشروع</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">
+                      المواقع المنشورة
+                    </label>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-primary" />
+                        <p className="text-foreground">{publishedProjects.length} موقع منشور</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
