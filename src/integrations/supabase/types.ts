@@ -14,6 +14,97 @@ export type Database = {
   }
   public: {
     Tables: {
+      deployments: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          project_id: string
+          status: string
+          updated_at: string
+          user_id: string
+          vercel_deployment_id: string | null
+          vercel_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          project_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          vercel_deployment_id?: string | null
+          vercel_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          project_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vercel_deployment_id?: string | null
+          vercel_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domains: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          project_id: string
+          ssl_enabled: boolean | null
+          status: string
+          updated_at: string
+          user_id: string
+          vercel_domain_id: string | null
+          verification_record: string | null
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          project_id: string
+          ssl_enabled?: boolean | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          vercel_domain_id?: string | null
+          verification_record?: string | null
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          project_id?: string
+          ssl_enabled?: boolean | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vercel_domain_id?: string | null
+          verification_record?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domains_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_apps: {
         Row: {
           code: string
