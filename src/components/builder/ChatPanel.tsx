@@ -186,11 +186,33 @@ export const ChatPanel = ({ projectId, onCodeGenerated }: ChatPanelProps) => {
 
   const handleDeploy = async () => {
     if (!projectId) return;
+
+    setIsGenerating(true);
     
-    toast({
-      title: "جارٍ النشر",
-      description: "سيتم نشر المشروع قريباً",
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('deploy-to-vercel', {
+        body: { projectId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "تم النشر بنجاح!",
+        description: `الموقع متاح على: ${data.url}`,
+      });
+
+      // Optionally open the deployed site
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Deployment error:', error);
+      toast({
+        variant: "destructive",
+        title: "خطأ في النشر",
+        description: error instanceof Error ? error.message : "فشل نشر المشروع",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
